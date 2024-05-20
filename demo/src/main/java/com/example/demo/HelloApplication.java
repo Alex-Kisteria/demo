@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Objects;
 import java.util.Random;
+import java.util.function.Consumer;
 
 public class HelloApplication extends Application {
 
@@ -30,6 +31,7 @@ public class HelloApplication extends Application {
     private ArrayList<Rectangle> glowCard = new ArrayList<>();
     private TextField[] betFields = new TextField[6]; // Array to store bet fields
     private int[] userInputBets = new int[6]; // Array to store user bets
+    final int[] winnerCard = {0};
     Random random = new Random();
 
     public static void main(String[] args) {
@@ -252,7 +254,12 @@ public class HelloApplication extends Application {
         //Btn for randomizer chooser
         Button rando_btn = new Button();
         rando_btn.setText("Start Randomizer");
-        rando_btn.setOnAction(event -> startRandomizer());
+        rando_btn.setOnAction(event -> {
+            startRandomizer(finalIndex -> {
+                System.out.println("Final Index: " + finalIndex);
+                // You can perform further actions with the final index here
+            });
+        });
         rando_btn.setPrefSize(100,12);
         grid.add(rando_btn,13,8,2,1);
         GridPane.setHalignment(rando_btn,HPos.CENTER);
@@ -268,23 +275,35 @@ public class HelloApplication extends Application {
     }//start
 
 
-    private void startRandomizer() {
+    // Modify the return type of the method to int
+    // Modify the return type of the method to int
+    // Modify the startRandomizer() method to accept a callback function
+    private void startRandomizer(Consumer<Integer> callback) {
         System.out.println("randomizer button clicked");
 
         // Track the start time
         long startTime = System.currentTimeMillis();
 
-        // Create a Timeline to repeatedly execute the logic
-        Timeline timeline = new Timeline(new KeyFrame(Duration.millis(50), event -> {
-            // Check if 5 seconds have passed
-            if (System.currentTimeMillis() - startTime >= 5000) {
-                // Stop the timeline
-                ((Timeline)event.getSource()).stop();
+        // Create a Timeline to handle the animation
+        Timeline timeline = new Timeline();
+
+        // Create a KeyFrame with the event handler
+        KeyFrame keyFrame = new KeyFrame(Duration.millis(100), event -> {
+            // Get the elapsed time
+            long elapsedTime = System.currentTimeMillis() - startTime;
+
+            // Check if 3 seconds have passed
+            if (elapsedTime >= 3000) {
+                timeline.stop(); // Stop the timeline
+                callback.accept(-1); // Call the callback with -1
                 return;
             }
 
             // Get a random index
             int randomIndex = random.nextInt(cardList.size());
+
+            // Call the callback with the final index
+            callback.accept(randomIndex);
 
             // Iterate over cardList and update the opacity
             for (int i = 0; i < cardList.size(); i++) {
@@ -299,7 +318,10 @@ public class HelloApplication extends Application {
                     }
                 });
             }
-        }));
+        });
+
+        // Add the KeyFrame to the timeline
+        timeline.getKeyFrames().add(keyFrame);
 
         // Set the timeline to repeat indefinitely
         timeline.setCycleCount(Timeline.INDEFINITE);
@@ -307,6 +329,13 @@ public class HelloApplication extends Application {
         // Start the timeline
         timeline.play();
     }
+
+
+
+
+
+
+
 
 
     private void openBetStage(int cardIndex) {
