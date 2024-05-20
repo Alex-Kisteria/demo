@@ -1,0 +1,7 @@
+.rectangle_glow {
+    -fx-effect: dropshadow(gaussian, yellow, 50, 0.5, 0, 0);
+
+}
+
+
+
